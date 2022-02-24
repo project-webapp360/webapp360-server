@@ -12,4 +12,8 @@ router.get('/users', roleMiddleware('ADMIN'), userController.getAllUsers)
 router.get('/token/refresh', userController.refreshToken)
 router.post('/token/delete', userController.deleteToken)
 
+
+router.post('/event/create', userController.eventCreate)
+router.get('/event/events', userController.getAllEvents)
+
 module.exports = router

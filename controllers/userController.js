@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Token = require('../models/token')
+const Event = require('../models/event')
 const UserService = require('../service/userService')
 const UserDto = require('../dto/user-dto')
 const TokenService = require('../service/tokenService')
@@ -107,6 +108,27 @@ class userController {
 
         const result = await Token.deleteOne({user: id})
        return res.json({id, result})
+    }
+
+
+
+    async eventCreate(req, res) {
+        const {title, dateStart, dateEnd, name, creator} = req.body
+        const event = new Event({
+            title: title,
+            dateStart: dateStart,
+            dateEnd: dateEnd,
+            name: name,
+            creator: creator
+        })
+
+        await event.save()
+        res.json(event)
+    }
+
+    async getAllEvents(req, res) {
+        const events = await Event.find()
+        res.json(events)
     }
 }
 
