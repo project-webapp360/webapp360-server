@@ -85,6 +85,8 @@ class userController {
 
         const userData = await TokenService.validateRefreshToken(token)
         const tokenFromDB = await TokenService.findToken(token)
+        console.log(userData)
+        console.log(userData.id + "      -id")
         console.log("1 - " + userData.id,"2 - " +  tokenFromDB)
 
         if (!userData || !tokenFromDB) {
