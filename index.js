@@ -13,10 +13,10 @@ const app = express()
 
 const PORT = process.env.PORT || 6000
 
-const corsOptions = {
+/*const corsOptions = {
     origin: 'https://webapp360-client.herokuapp.com',
     optionsSuccessStatus: 200 // For legacy browser support
-}
+}*/
 
 app.use(cors(corsOptions));
 app.use(express.urlencoded({
