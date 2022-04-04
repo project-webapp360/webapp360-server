@@ -128,6 +128,21 @@ class userController {
         res.json(event)
     }
 
+    async eventDelete(req, res) {
+        try {
+            const id = req.params.id
+            const event = await Event.findById(id)
+            if (!event) {
+                res.json("Такой event отсутсвует или был удален")
+            } else {
+                await Event.deleteOne({_id: id})
+                res.json('delete event')
+            }
+        } catch (e) {
+            res.json(e)
+        }
+    }
+
     async getAllEvents(req, res) {
         const events = await Event.find()
         res.json(events)

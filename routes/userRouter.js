@@ -14,6 +14,7 @@ router.post('/token/delete', userController.deleteToken)
 
 
 router.post('/event/create', userController.eventCreate)
+router.get('/event/delete/:id', userController.eventDelete)
 router.get('/event/events', userController.getAllEvents)
 
 module.exports = router
