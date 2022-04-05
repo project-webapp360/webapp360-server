@@ -5,6 +5,10 @@ const Event = require('../models/event')
 const UserService = require('../service/userService')
 const UserDto = require('../dto/user-dto')
 const TokenService = require('../service/tokenService')
+const uuid = require('uuid');
+const mailService = require("../service/mailService");
+const userService = require('../service/userService')
+const user = require('../models/user')
 
 
 class userController {
@@ -21,8 +25,11 @@ class userController {
                 return res.status(400).json({message: 'Такой пользователь уже существует'})
             }
 
-            const hashPassword = await UserService.hashPassword(password, 3)
-            const user = await UserService.createUserAndSaveToDB(email, hashPassword, role)
+            const hashPassword = await UserService.hashPassword(password, 3);
+            const activationLink =  uuid.v4();
+
+            const user = await UserService.createUserAndSaveToDB(email, hashPassword, role, activationLink)
+            await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
 
             const userDto = new UserDto(user)
             const tokens = TokenService.generateToken({...userDto})
@@ -40,7 +47,7 @@ class userController {
 
     async login(req, res) {
         try {
-            const {email, password} = req.body
+            const {email, password, isActivated} = req.body
             console.log(email, password)
             const user = await UserService.findUserFromDB(email)
             if (!user) {
@@ -50,6 +57,11 @@ class userController {
             const validPassword = await UserService.comparePassword(password, user.password)
             if (!validPassword) {
                 return res.status(400).json({message: `Введен неверный пароль`})
+            }
+
+            if (!user.isActivated)
+            {
+                return res.status(400).json({message: `Пользователь ${email} не активирован`});
             }
 
             const userDto = new UserDto(user)
@@ -123,8 +135,21 @@ class userController {
             name: name,
             creator: creator
         })
-
-        await event.save()
+        
+        user.find({isActivated: "true"}).exec(function(err, users) {
+            if (err)
+            {
+                throw err;
+            }
+            async function processArray(emailsArray)
+            {
+               for (const user of users)
+                {
+                    await mailService.sendEventMail(user.email, `${process.env.API_URL}/event/events`);
+                }
+            }
+            processArray(emailsArray);
+        });
         res.json(event)
     }
 
@@ -146,6 +171,17 @@ class userController {
     async getAllEvents(req, res) {
         const events = await Event.find()
         res.json(events)
+    }
+    async activate (req, res, next)
+    {
+        try {
+            const activationLink = req.params.link;
+            await userService.activate(activationLink);
+            return res.redirect(process.env.CLIENT_URL);
+        }
+        catch {
+
+        }
     }
 }
 

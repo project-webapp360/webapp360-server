@@ -17,4 +17,6 @@ router.post('/event/create', userController.eventCreate)
 router.get('/event/delete/:id', userController.eventDelete)
 router.get('/event/events', userController.getAllEvents)
 
+router.get('/activate/:link', userController.activate)
+
 module.exports = router

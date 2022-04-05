@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
     console.log('Hello, React!')
     console.log(path.join(__dirname, '../front/build'))
     // res.sendFile(path.join(__dirname, '../front/build/index.html'));
-    res.sendFile("C:/Users/ASUS_/WebstormProjects/intspirit/SPA-WebApp360-M2/front/build/index.html")
+    res.sendFile("C:/Users/Timur/projects_js/webapp360-client/public/index.html")
     // res.sendFile(path.join(__dirname, 'public/index.html'))
     // res.json({message: "please help up"})
     // res.render('')
