@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const User = require('../models/user')
 const UserDto = require('../dto/user-dto')
+const user = require('../models/user')
 
 class UserService {
 
@@ -12,11 +13,12 @@ class UserService {
      return User.findById(id)
  }
 
- async createUserAndSaveToDB(email, hashPassword, role) {
+ async createUserAndSaveToDB(email, hashPassword, role, activationLink) {
      const user = new User({
          email,
          password: hashPassword,
-         role
+         role,
+         activationLink: activationLink
      })
      return user.save()
  }
@@ -32,7 +34,15 @@ class UserService {
  async comparePassword(reqPassword, userPassword) {
      return bcrypt.compare(reqPassword, userPassword)
  }
-
+ async activate(activationLink) {
+    const USER = await user.findOne({"activationLink": activationLink});
+    if (!USER)
+    {
+        throw new Error("Неккоректная ссылка активации");
+    }
+    USER.isActivated = true;
+    await USER.save();
+}
 }
 
 module.exports = new UserService()
