@@ -133,6 +133,8 @@ class userController {
             name: name,
             creator: creator
         })
+
+        event.save()
         
         user.find({isActivated: "true"}).exec(function(err, users) {
             if (err)
