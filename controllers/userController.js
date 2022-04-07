@@ -126,6 +126,10 @@ class userController {
 
     async eventCreate(req, res) {
         const {title, dateStart, dateEnd, name, creator} = req.body
+        if (!title || !dataStart || !dateEnd || !name || creator) {
+            res.status(400).json({message: `Отсутствуют аргумент(ы) event`})
+        }
+
         const event = new Event({
             title: title,
             dateStart: dateStart,
