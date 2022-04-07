@@ -170,7 +170,7 @@ class userController {
         const events = await Event.find()
         res.json(events)
     }
-    async activate (req, res, next)
+    async activate (req, res)
     {
         try {
             const activationLink = req.params.link;
