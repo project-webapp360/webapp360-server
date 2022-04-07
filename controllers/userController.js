@@ -124,8 +124,6 @@ class userController {
        return res.json({id, result})
     }
 
-
-
     async eventCreate(req, res) {
         const {title, dateStart, dateEnd, name, creator} = req.body
         const event = new Event({
@@ -141,14 +139,14 @@ class userController {
             {
                 throw err;
             }
-            async function processArray(emailsArray)
+            async function processArray()
             {
                for (const user of users)
                 {
                     await mailService.sendEventMail(user.email, `${process.env.API_URL}/event/events`);
                 }
             }
-            processArray(emailsArray);
+            processArray();
         });
         res.json(event)
     }
@@ -180,7 +178,7 @@ class userController {
             return res.redirect(process.env.CLIENT_URL);
         }
         catch {
-
+            console.log(e);
         }
     }
 }

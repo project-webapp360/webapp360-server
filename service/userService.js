@@ -35,7 +35,7 @@ class UserService {
      return bcrypt.compare(reqPassword, userPassword)
  }
  async activate(activationLink) {
-    const USER = await user.findOne({activationLink});
+    const USER = await user.findOne({"activationLink": activationLink});
     if (!USER)
     {
         throw new Error("Неккоректная ссылка активации");

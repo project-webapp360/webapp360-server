@@ -14,11 +14,13 @@ class mailService
            }
         })
     }
+
     async sendActivationMail(to, link)
     {
+        console.log(to, link);
         await this.transporter.sendMail ( {
             from: process.env.SMTP_USER,
-            to,
+            to: to,
             subject: "Активация аккаунта на " + process.env.API_URL,
             text: "",
             html:
@@ -28,6 +30,7 @@ class mailService
                 </div>`
         })
     }
+
     async sendEventMail(to, link){
         await this.transporter.sendMail ( {
             from: process.env.SMTP_USER,
@@ -41,6 +44,7 @@ class mailService
                 </div>`
         })
     }
+    
 }
 
 module.exports = new mailService();
