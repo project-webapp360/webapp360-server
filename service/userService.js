@@ -27,6 +27,10 @@ class UserService {
      return User.find()
  }
 
+ async deleteUserByEmail(email) {
+     await User.deleteOne({email})
+ }
+
  async hashPassword(password, salt) {
      return bcrypt.hash(password, salt)
  }

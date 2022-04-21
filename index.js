@@ -47,7 +47,8 @@ app.use('/api', userRoutes)
 async function start() {
     try {
         await mongoose.connect(process.env.MONGO_BASE_URL, {
-            useNewUrlParser: true
+            useNewUrlParser: true,
+            useUnifiedTopology: true
         })
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`)

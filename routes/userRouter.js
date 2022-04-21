@@ -8,6 +8,7 @@ const path = require("path");
 
 router.post('/register', userController.registration)
 router.post('/login', userController.login)
+router.post('/user/delete', userController.deleteUser)
 // router.get('/users', roleMiddleware('ADMIN'), userController.getAllUsers)
 router.get('/users', userController.getAllUsers)
 router.get('/token/refresh', userController.refreshToken)
@@ -15,9 +16,15 @@ router.post('/token/delete', userController.deleteToken)
 
 
 router.post('/event/create', userController.eventCreate)
+router.post('/event/create/user', userController.eventCreateUser)
 router.get('/event/delete/:id', userController.eventDelete)
 router.get('/event/events', userController.getAllEvents)
+router.post('/event/events/user', userController.getAllEventsUser)
+
 
 router.get('/activate/:link', userController.activate)
+
+router.get('/testing/create', userController.testingCreateRoute)
+router.get('/testing/delete', userController.testingDeleteRoute)
 
 module.exports = router
