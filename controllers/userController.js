@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const Token = require('../models/token')
 const Event = require('../models/event')
 const UserEvent = require('../models/userEvent')
+const User = require('../models/user')
 const Test1 = require('../models/test1')
 const Test2 = require('../models/test2')
 const UserService = require('../service/userService')
@@ -253,26 +254,39 @@ class userController {
 
             console.log(`${idUser} + ${idEvent}`)
 
-            let userEvent = await UserEvent.findOne({user: idUser})
-            if (!userEvent) {
-                return res.status(400).json({message: `События пользователя не найдены`})
-            }
-            console.log('hello')
-            console.log(userEvent)
-            // await userEvent.events.filter(event => event.type !== idEvent)
+            const users = await userService.getAllUserFromDB()
+            console.log(users)
+            let arrayEvents = []
+            for (let user of users) {
 
-            // await userEvent.events.pull(idEvent)
-            await userEvent.update(
-                {user: idUser},
-                {$pullAll: {events: {type: idEvent}}},
-                {safe: true},
-                function (error, result) {
-                    console.log(result)
-                }
-            )
-            console.log(userEvent)
+                const userEvent = await UserEvent.findOne({user: user._id})
+                    if (userEvent !== null) {
+                        if (!userEvent) {
+                            return res.status(400).json({message: `События пользователя не найдены`})
+                        }
+
+                        console.log('hello')
+                        console.log(userEvent)
+
+                        userEvent.events.map((item) => {
+                            console.log('=')
+                            if (item.type.toString() === idEvent.toString()) {
+                                console.log('+')
+                            } else {
+                                console.log(`${item.type} + ${idEvent}`)
+                                console.log('-')
+                                arrayEvents.push(item)
+                            }
+                        })
+                        userEvent.events = arrayEvents
+                        await userEvent.save()
+                        arrayEvents = []
+                    } else {
+                        arrayEvents = []
+                    }
+            }
+            console.log(arrayEvents)
             console.log('bye')
-            await userEvent.save()
             res.json('delete event')
 
         } catch (e) {
