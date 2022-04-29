@@ -101,10 +101,12 @@ class userController {
             const tokens = TokenService.generateToken({...userDto})
             await TokenService.saveToken(userDto.id, tokens.refreshToken)
 
-            const result = {
+            /*const result = {
                 ...tokens,
                 user: userDto
-            }
+            }*/
+
+            const result = userDto
             return res.json(result)
         } catch (e) {
             console.log(e)
@@ -174,6 +176,7 @@ class userController {
     async eventCreate(req, res) {
         const {title, dateStart, dateEnd, name, creator} = req.body
         if (!title || !dateStart || !dateEnd || !name || !creator) {
+            console.log(`title: ${title} + dateStart: ${dateStart} + dateEnd: ${dateEnd} + name: ${name} + creator: ${creator}`)
             return res.status(400).json({message: `Отсутствуют аргумент(ы) event`})
         }
 
@@ -205,7 +208,7 @@ class userController {
     }
 
     async eventCreateUser(req, res) {
-        const {eventId} = req.body
+        const {id} = req.body
 
         const users = await userService.getAllUserFromDB()
         if (!users) {
@@ -218,7 +221,7 @@ class userController {
             console.log({userEvents: userEvents})
             if(userEvents != null) {
                 userEvents.events.push({
-                    type: eventId,
+                    type: id,
                     needComplete: true
                 })
                 userEvents.save()
@@ -244,6 +247,39 @@ class userController {
         }
     }
 
+    async eventDeleteUser(req, res) {
+        try {
+            const {idUser, idEvent} = req.body
+
+            console.log(`${idUser} + ${idEvent}`)
+
+            let userEvent = await UserEvent.findOne({user: idUser})
+            if (!userEvent) {
+                return res.status(400).json({message: `События пользователя не найдены`})
+            }
+            console.log('hello')
+            console.log(userEvent)
+            // await userEvent.events.filter(event => event.type !== idEvent)
+
+            // await userEvent.events.pull(idEvent)
+            await userEvent.update(
+                {user: idUser},
+                {$pullAll: {events: {type: idEvent}}},
+                {safe: true},
+                function (error, result) {
+                    console.log(result)
+                }
+            )
+            console.log(userEvent)
+            console.log('bye')
+            await userEvent.save()
+            res.json('delete event')
+
+        } catch (e) {
+            res.json(e)
+        }
+    }
+
     async getAllEvents(req, res) {
         const events = await Event.find()
         res.json(events)
@@ -251,8 +287,30 @@ class userController {
 
     async getAllEventsUser(req, res) {
         const {id} = req.body
+        // console.log(`id:   ${id}`)
         const userEvents = await UserEvent.findOne({user: id})
-        res.json(userEvents.events)
+        // console.log(`userEvents:   ${userEvents}` )
+        let arrayEvents = []
+        for (let event of userEvents.events) {
+            const eventdb = await Event.findOne({_id: event.type})
+            if (!eventdb) {
+                return res.status(400).json({message: `Такого события нету в общих событиях в бд`})
+            }
+            const eventModel = {
+                _id: eventdb._id,
+                title: eventdb.title,
+                dateStart: eventdb.dateStart,
+                dateEnd: eventdb.dateEnd,
+                name: eventdb.name,
+                creator: eventdb.creator,
+                needComplete: event.needComplete
+            }
+            arrayEvents.push(eventModel)
+        }
+        // res.json(userEvents.events)
+        // console.log(`arrayEvents: ${arrayEvents}`)
+        // console.log(arrayEvents)
+        res.json(arrayEvents)
     }
 
     async getUserEvents(req, res) {
@@ -260,6 +318,33 @@ class userController {
         const allEvents = await Event.find()
         const userEvents = await UserEvent.findOne({user: id})
     }
+
+    async resultsSetUser(req, res) {
+        const {id, results} = req.body
+        console.log(id)
+        console.log(results)
+
+        const event = await Event.findOne({_id: id})
+        if (!event) {
+            return res.status(400).json({message: `Такого события нету в бд`})
+        }
+        event.results.push(results)
+        event.save()
+    }
+
+    async resultsGetUser(req, res) {
+        try {
+            const {eventId} = req.body
+            const event = await Event.findOne({_id: eventId})
+            if (!event) {
+                return res.status(400).json({message: `Такого события нету в бд`})
+            }
+            res.json(event)
+        } catch (e) {
+            res.json(e)
+        }
+    }
+
 
     async testingCreateRoute(req, res) {
         try {

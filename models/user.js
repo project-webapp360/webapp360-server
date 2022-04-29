@@ -22,6 +22,7 @@ const User = new Schema({
     activationLink:{
         type: String
     }
+
 })
 
 module.exports = model('User', User)

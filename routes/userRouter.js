@@ -20,6 +20,10 @@ router.post('/event/create/user', userController.eventCreateUser)
 router.get('/event/delete/:id', userController.eventDelete)
 router.get('/event/events', userController.getAllEvents)
 router.post('/event/events/user', userController.getAllEventsUser)
+router.post('/event/delete/user', userController.eventDeleteUser)
+
+router.post('/results/set/user', userController.resultsSetUser)
+router.post('/results/get/user', userController.resultsGetUser)
 
 
 router.get('/activate/:link', userController.activate)

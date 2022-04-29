@@ -21,6 +21,11 @@ const Event = new Schema({
         type: String,
         required: true
     },
+    results: [
+        {
+
+        }
+    ],
 })
 
 module.exports = model('Event', Event)
