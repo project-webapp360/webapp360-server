@@ -293,7 +293,7 @@ class userController {
             res.json(e)
         }
     }
-    s
+
 
     async getAllEvents(req, res) {
         const events = await Event.find()
