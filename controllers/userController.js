@@ -196,7 +196,7 @@ class userController {
             {
                for (const user of users)
                 {
-                    await mailService.sendEventMail(user.email, `${process.env.API_URL}/event/events`);
+                    await mailService.sendEventMail(user.email, `${process.env.API_URL}/event/events`, user.email, dateEnd);
                 }
             }
             processArray();
@@ -302,6 +302,20 @@ class userController {
         }
         catch {
             console.log(e);
+        }
+    }
+
+    async test()
+    {
+        const uArr = await userService.getAllUserFromDB();
+        const names = [];
+        for (let i = 0; i < uArr.length; i++)
+        {
+            names[i] = uArr[i].email;
+        }
+        for (let name of names)
+        {
+            console.log(name);
         }
     }
 }

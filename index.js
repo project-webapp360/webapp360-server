@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const path = require("path");
+const uController = require("./controllers/userController");
 
 const userRoutes = require('./routes/userRouter')
 const indexRouter = require('./routes/indexRouter')
@@ -53,11 +54,12 @@ async function start() {
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`)
         })
-
+        await uController.test();
     } catch (e) {
         console.log(e)
     }
 }
+
 
 start()
 

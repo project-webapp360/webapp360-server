@@ -25,13 +25,13 @@ class mailService
             text: "",
             html:
                 `<div>
-                    <h1>Для активации аккаунта перейдите по ссылке:</h1>
-                    <a href = "${link}">${link}</a>
+                    <p>Поздравляем с регистрацией на нашем сайте!</p>
+                    <p>Для активации аккаунта перейдите по ссылке: <a href = "${link}">${link}</a></p>
                 </div>`
         })
     }
 
-    async sendEventMail(to, link){
+    async sendEventMail(to, link, name, date){
         await this.transporter.sendMail ( {
             from: process.env.SMTP_USER,
             to,
@@ -39,8 +39,9 @@ class mailService
             text: "",
             html:
                 `<div>
-                    <h1>Для прохождения опроса перейдите по ссылке:</h1>
-                    <a href = "${link}">${link}</a>
+                    <p>Здравствуйте! Вам назначен новый опрос на сотрудника ${name}.</p>
+                    <p>Пожалуйста, пройдите его до ${date}.</p>
+                    <p>Для прохождения опроса перейдите по ссылке: <a href = "${link}">${link}</a></p>
                 </div>`
         })
     }
