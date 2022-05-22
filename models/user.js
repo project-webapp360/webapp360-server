@@ -21,6 +21,10 @@ const User = new Schema({
     }, 
     activationLink:{
         type: String
+    },
+    isBanned: {
+        type: Boolean,
+        default: false
     }
 
 })

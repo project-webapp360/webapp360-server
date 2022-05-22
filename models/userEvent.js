@@ -10,7 +10,10 @@ const UserEvent = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Event'
         },
-        needComplete: Boolean
+        needComplete: {
+            type: Boolean,
+            default: true
+        }
     }]
 })
 

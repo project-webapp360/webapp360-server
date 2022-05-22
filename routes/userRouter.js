@@ -9,6 +9,8 @@ const path = require("path");
 router.post('/register', userController.registration)
 router.post('/login', userController.login)
 router.post('/user/delete', userController.deleteUser)
+router.post('/user/banned', userController.userBanned)
+router.post('/user/unbanned', userController.userUnbanned)
 // router.get('/users', roleMiddleware('ADMIN'), userController.getAllUsers)
 router.get('/users', userController.getAllUsers)
 router.get('/token/refresh', userController.refreshToken)

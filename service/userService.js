@@ -31,6 +31,16 @@ class UserService {
      await User.deleteOne({email})
  }
 
+ async bannedUser(user) {
+     user.isBanned = true
+     return user.save()
+ }
+
+ async unbannedUser(user) {
+     user.isBanned = false
+     return user.save()
+ }
+
  async hashPassword(password, salt) {
      return bcrypt.hash(password, salt)
  }

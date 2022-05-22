@@ -98,6 +98,10 @@ class userController {
                 return res.status(400).json({message: `Пользователь ${email} не активирован`});
             }
 
+            if (user.isBanned) {
+                return res.status(400).json({message: `Пользователь ${email} заблокирован`});
+            }
+
             const userDto = new UserDto(user)
             const tokens = TokenService.generateToken({...userDto})
             await TokenService.saveToken(userDto.id, tokens.refreshToken)
@@ -125,6 +129,34 @@ class userController {
             res.json(`${email} was deleted`)
         } catch (e) {
             res.json(e)
+        }
+    }
+
+    async userBanned(req, res) {
+        try {
+            const {email} = req.body
+            const user = await userService.findUserFromDB(email)
+            if (!user) {
+                return res.status(400).json({message: "Такого пользователя не существует или он уже был удален"})
+            }
+            await userService.bannedUser(user)
+            res.json(`${email} was banned`)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    async userUnbanned(req, res) {
+        try {
+            const {email} = req.body
+            const user = await userService.findUserFromDB(email)
+            if (!user) {
+                return res.status(400).json({message: "Такого пользователя не существует или он уже был удален"})
+            }
+            await userService.unbannedUser(user)
+            res.json(`${email} was unbanned`)
+        } catch (e) {
+            console.log(e)
         }
     }
 
@@ -250,12 +282,13 @@ class userController {
 
     async eventDeleteUser(req, res) {
         try {
+            console.log('12312312')
             const {idUser, idEvent} = req.body
 
             console.log(`${idUser} + ${idEvent}`)
 
             const users = await userService.getAllUserFromDB()
-            console.log(users)
+            // console.log(users)
             let arrayEvents = []
             for (let user of users) {
 
@@ -264,9 +297,6 @@ class userController {
                         if (!userEvent) {
                             return res.status(400).json({message: `События пользователя не найдены`})
                         }
-
-                        console.log('hello')
-                        console.log(userEvent)
 
                         userEvent.events.map((item) => {
                             console.log('=')
@@ -285,7 +315,7 @@ class userController {
                         arrayEvents = []
                     }
             }
-            console.log(arrayEvents)
+            // console.log(arrayEvents)
             console.log('bye')
             res.json('delete event')
 
@@ -302,7 +332,7 @@ class userController {
 
     async getAllEventsUser(req, res) {
         const {id} = req.body
-        // console.log(`id:   ${id}`)
+        console.log(`id:   ${id}`)
         const userEvents = await UserEvent.findOne({user: id})
         // console.log(`userEvents:   ${userEvents}` )
         let arrayEvents = []
