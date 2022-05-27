@@ -25,7 +25,24 @@ const User = new Schema({
     isBanned: {
         type: Boolean,
         default: false
-    }
+    },
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
+    nickName: {
+        type: String,
+        required: true
+    },
+    results: [
+        {
+
+        }
+    ]
 
 })
 

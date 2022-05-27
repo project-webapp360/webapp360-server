@@ -8,6 +8,7 @@ const path = require("path");
 
 router.post('/register', userController.registration)
 router.post('/login', userController.login)
+router.post('/user/profile', userController.getIdToProfile)
 router.post('/user/delete', userController.deleteUser)
 router.post('/user/banned', userController.userBanned)
 router.post('/user/unbanned', userController.userUnbanned)
@@ -26,6 +27,9 @@ router.post('/event/delete/user', userController.eventDeleteUser)
 
 router.post('/results/set/user', userController.resultsSetUser)
 router.post('/results/get/user', userController.resultsGetUser)
+router.post('/user/get/results', userController.userGetResult)
+
+
 
 
 router.get('/activate/:link', userController.activate)

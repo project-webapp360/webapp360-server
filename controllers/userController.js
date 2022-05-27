@@ -20,8 +20,8 @@ class userController {
 
     async registration(req, res) {
         try {
-            const {email, password, role} = req.body
-            if(!email || !password) {
+            const {email, password, role, nickName, firstName, lastName} = req.body
+            if (!email || !password) {
                 return res.status(400).json({message: 'Пароль или email - некорректны'})
             }
 
@@ -31,9 +31,9 @@ class userController {
             }
 
             const hashPassword = await UserService.hashPassword(password, 3);
-            const activationLink =  uuid.v4();
+            const activationLink = uuid.v4();
 
-            const user = await UserService.createUserAndSaveToDB(email, hashPassword, role, activationLink)
+            const user = await UserService.createUserAndSaveToDB(email, hashPassword, role, activationLink, nickName, firstName, lastName)
             const userdb = await userService.findUserFromDB(email)
 
 
@@ -93,8 +93,7 @@ class userController {
                 return res.status(400).json({message: `Введен неверный пароль`})
             }
 
-            if (!user.isActivated)
-            {
+            if (!user.isActivated) {
                 return res.status(400).json({message: `Пользователь ${email} не активирован`});
             }
 
@@ -114,9 +113,24 @@ class userController {
             const result = userDto
             return res.json(result)
         } catch (e) {
-            console.log(e)
+            res.json(e)
         }
     }
+
+   async getIdToProfile (req, res) {
+       try {
+           const {email} = req.body
+           const user = await UserService.findUserFromDB(email)
+           console.log(user.email + user.id)
+           if (!user) {
+               return res.status(400).json({message: `Пользователь ${email} не найден`})
+           }
+           console.log(user.id)
+           res.json(user.id)
+       } catch (e) {
+           res.json(e)
+       }
+   }
 
     async deleteUser(req, res) {
         try {
@@ -169,7 +183,7 @@ class userController {
         }
     }
 
-    async refreshToken(req , res) {
+    async refreshToken(req, res) {
         const token = req.headers.authorization.split(' ')[1]
         if (!token) {
             return res.status(400).json({message: `Токен отстутсвует`})
@@ -181,7 +195,7 @@ class userController {
         const tokenFromDB = await TokenService.findToken(token)
         console.log(userData)
         console.log(userData.id + "      -id")
-        console.log("1 - " + userData.id,"2 - " +  tokenFromDB)
+        console.log("1 - " + userData.id, "2 - " + tokenFromDB)
 
         if (!userData || !tokenFromDB) {
             return res.status(400).json({message: `Неавторизованный пользователь`})
@@ -203,38 +217,47 @@ class userController {
         const {id} = req.body
 
         const result = await Token.deleteOne({user: id})
-       return res.json({id, result})
+        return res.json({id, result})
     }
 
     async eventCreate(req, res) {
-        const {title, dateStart, dateEnd, name, creator} = req.body
-        if (!title || !dateStart || !dateEnd || !name || !creator) {
+        const {title, dateStart, dateEnd, name, creator, type, needToComplete} = req.body
+        console.log(`title: ${title} + dateStart: ${dateStart} + dateEnd: ${dateEnd} + name: ${name} + creator: ${creator} + type: ${type}`)
+
+        if (!title || !dateStart || !dateEnd || !name || !creator || !type) {
             console.log(`title: ${title} + dateStart: ${dateStart} + dateEnd: ${dateEnd} + name: ${name} + creator: ${creator}`)
             return res.status(400).json({message: `Отсутствуют аргумент(ы) event`})
         }
+
+        const targetEmail = name.split('|')[1]
+        console.log(targetEmail)
+        const newCreator = name.split('|')[0]
 
         const event = new Event({
             title: title,
             dateStart: dateStart,
             dateEnd: dateEnd,
-            name: name,
-            creator: creator
+            name: newCreator,
+            creator: creator,
+            type: type,
+            needToComplete: needToComplete,
+            alreadyComplete: 0,
+            emailName: targetEmail
         })
 
-        event.save()
+        await event.save()
 
-        user.find({isActivated: "true"}).exec(function(err, users) {
-            if (err)
-            {
+        user.find({isActivated: "true"}).exec(function (err, users) {
+            if (err) {
                 throw err;
             }
-            async function processArray()
-            {
-               for (const user of users)
-                {
+
+            async function processArray() {
+                for (const user of users) {
                     await mailService.sendEventMail(user.email, `${process.env.API_URL}/event/events`);
                 }
             }
+
             processArray();
         });
         res.json(event)
@@ -249,13 +272,11 @@ class userController {
         }
 
         for (let user of users) {
-            console.log(user)
             const userEvents = await UserEvent.findOne({user: user._id})
-            console.log({userEvents: userEvents})
-            if(userEvents != null) {
+            if (userEvents != null) {
                 userEvents.events.push({
                     type: id,
-                    needComplete: true
+                    needComplete: 1
                 })
                 userEvents.save()
             }
@@ -293,27 +314,27 @@ class userController {
             for (let user of users) {
 
                 const userEvent = await UserEvent.findOne({user: user._id})
-                    if (userEvent !== null) {
-                        if (!userEvent) {
-                            return res.status(400).json({message: `События пользователя не найдены`})
-                        }
-
-                        userEvent.events.map((item) => {
-                            console.log('=')
-                            if (item.type.toString() === idEvent.toString()) {
-                                console.log('+')
-                            } else {
-                                console.log(`${item.type} + ${idEvent}`)
-                                console.log('-')
-                                arrayEvents.push(item)
-                            }
-                        })
-                        userEvent.events = arrayEvents
-                        await userEvent.save()
-                        arrayEvents = []
-                    } else {
-                        arrayEvents = []
+                if (userEvent !== null) {
+                    if (!userEvent) {
+                        return res.status(400).json({message: `События пользователя не найдены`})
                     }
+
+                    userEvent.events.map((item) => {
+                        console.log('=')
+                        if (item.type.toString() === idEvent.toString()) {
+                            console.log('+')
+                        } else {
+                            console.log(`${item.type} + ${idEvent}`)
+                            console.log('-')
+                            arrayEvents.push(item)
+                        }
+                    })
+                    userEvent.events = arrayEvents
+                    await userEvent.save()
+                    arrayEvents = []
+                } else {
+                    arrayEvents = []
+                }
             }
             // console.log(arrayEvents)
             console.log('bye')
@@ -336,6 +357,13 @@ class userController {
         const userEvents = await UserEvent.findOne({user: id})
         // console.log(`userEvents:   ${userEvents}` )
         let arrayEvents = []
+        const events = await Event.find()
+        let completedEvents = 0
+        for (let event of events) {
+            if (event.alreadyComplete === event.needToComplete) {
+                completedEvents += 1
+            }
+        }
         for (let event of userEvents.events) {
             const eventdb = await Event.findOne({_id: event.type})
             if (!eventdb) {
@@ -348,13 +376,13 @@ class userController {
                 dateEnd: eventdb.dateEnd,
                 name: eventdb.name,
                 creator: eventdb.creator,
-                needComplete: event.needComplete
+                needComplete: event.needComplete,
+                type: eventdb.type,
+                completedEvents: completedEvents,
+                targetEmail: eventdb.emailName
             }
             arrayEvents.push(eventModel)
         }
-        // res.json(userEvents.events)
-        // console.log(`arrayEvents: ${arrayEvents}`)
-        // console.log(arrayEvents)
         res.json(arrayEvents)
     }
 
@@ -365,16 +393,48 @@ class userController {
     }
 
     async resultsSetUser(req, res) {
-        const {id, results} = req.body
+        const {id, eventsResults, userId, targetEmail} = req.body
         console.log(id)
-        console.log(results)
+        console.log(eventsResults)
+        console.log(userId)
+        console.log(targetEmail)
 
-        const event = await Event.findOne({_id: id})
-        if (!event) {
-            return res.status(400).json({message: `Такого события нету в бд`})
+        try {
+            const event = await Event.findOne({_id: id})
+            if (!event) {
+                return res.status(400).json({message: `Такого события нету в бд`})
+            }
+
+            const user = await UserService.findUserFromDB(targetEmail)
+            if (!user) {
+                return res.status(400).json({message: `Пользователь ${targetEmail} не найден`})
+            }
+
+            event.results.push(eventsResults)
+            event.alreadyComplete += 1
+            event.save()
+
+            user.results.push(eventsResults)
+            user.save()
+
+            const userEvents = await UserEvent.findOne({user: userId})
+            if (!userEvents) {
+                return res.status(400).json({message: `userEvents не были найдены`})
+            }
+
+            userEvents.events.map(item => {
+                if (item.type == id) {
+                    console.log(item.needComplete)
+                    item.needComplete = false
+                }
+            })
+            userEvents.save()
+            res.json(userEvents.events)
+        } catch (e) {
+            console.log(e)
         }
-        event.results.push(results)
-        event.save()
+
+
     }
 
     async resultsGetUser(req, res) {
@@ -385,6 +445,19 @@ class userController {
                 return res.status(400).json({message: `Такого события нету в бд`})
             }
             res.json(event)
+        } catch (e) {
+            res.json(e)
+        }
+    }
+
+    async userGetResult (req, res) {
+        try {
+            const {userId} = req.body
+            const user = await UserService.findUserByIdFromDB(userId)
+            if (!user) {
+                return res.status(400).json({message: `Такого события нету в бд`})
+            }
+            res.json(user)
         } catch (e) {
             res.json(e)
         }
@@ -423,14 +496,12 @@ class userController {
     }
 
 
-    async activate (req, res)
-    {
+    async activate(req, res) {
         try {
             const activationLink = req.params.link;
             await userService.activate(activationLink);
             return res.redirect(process.env.CLIENT_URL);
-        }
-        catch {
+        } catch {
             console.log(e);
         }
     }

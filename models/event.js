@@ -17,8 +17,17 @@ const Event = new Schema({
         type: String,
         required: true
     },
+    emailName: {
+        type: String,
+        required: true,
+        default: "hello@mail.ru"
+    },
     creator: {
         type: String,
+        required: true
+    },
+    type: {
+        type: Number,
         required: true
     },
     results: [
@@ -26,6 +35,14 @@ const Event = new Schema({
 
         }
     ],
+    needToComplete: {
+        type: Number,
+        required: true
+    },
+    alreadyComplete: {
+        type: Number,
+        required: true
+    },
 })
 
 module.exports = model('Event', Event)

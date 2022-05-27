@@ -13,12 +13,15 @@ class UserService {
      return User.findById(id)
  }
 
- async createUserAndSaveToDB(email, hashPassword, role, activationLink) {
+ async createUserAndSaveToDB(email, hashPassword, role, activationLink, nickName, firstName, lastName) {
      const user = new User({
          email,
          password: hashPassword,
          role,
-         activationLink: activationLink
+         activationLink: activationLink,
+         nickName,
+         firstName,
+         lastName
      })
      return user.save()
  }
